@@ -13,7 +13,7 @@ class IChapterRepository:
     async def get_by_id(self, chapter_id: UUID) -> Optional[ChapterRead]:
         raise NotImplementedError
 
-    async def list(self) -> List[ChapterRead]:
+    async def list(self, title: str = None) -> List[ChapterRead]:
         raise NotImplementedError
 
 
@@ -38,7 +38,7 @@ class ChapterRepository(IChapterRepository):
         result = await self.db.execute(query)
         return result.scalar_one_or_none()
 
-    async def list(self) -> List[ChapterRead]:
+    async def list(self, title: str = None) -> List[ChapterRead]:
         query = (
             select(Chapter)
             # "is" not gonna work here
@@ -49,5 +49,7 @@ class ChapterRepository(IChapterRepository):
             )
             .order_by(Chapter.order_in_parent)
         )
+        if title:
+            query = query.where(Chapter.title.ilike(f"%{title}%"))
         result = await self.db.execute(query)
         return result.scalars().all()
