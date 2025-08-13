@@ -50,6 +50,13 @@ class ChapterRepository(IChapterRepository):
             .order_by(Chapter.order_in_parent)
         )
         if title:
-            query = query.where(Chapter.title.ilike(f"%{title}%"))
+            query = (
+                select(Chapter)
+                .where(Chapter.title.ilike(f"%{title}%"))  # noqa: E711
+                .options(
+                    selectinload(Chapter.subchapters).selectinload(Chapter.subchapters)
+                )
+                .order_by(Chapter.order_in_parent)
+            )
         result = await self.db.execute(query)
         return result.scalars().all()
