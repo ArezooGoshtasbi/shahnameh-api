@@ -7,3 +7,6 @@ class ChapterService:
 
     async def fetch_all_chapters(self):
         return await self.repo.list()
+
+    async def get_by_id(self, chapter_id: str):
+        return await self.repo.get_by_id(chapter_id)

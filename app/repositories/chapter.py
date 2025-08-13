@@ -26,20 +26,17 @@ class ChapterRepository(IChapterRepository):
         for sub in chapter.subchapters:
             self._sort_subchapters(sub)
 
-    async def get_by_id(self, chapter_id: UUID) -> Optional[ChapterRead]:
-        query = select(Chapter).where(Chapter.id == chapter_id)
-        row = await self.db.execute(query)
-        if row:
-            root_item = ChapterRead(**dict(row))
-            sub_query = select(Chapter).where(Chapter.parent_id == chapter_id)
-            items = [
-                ChapterRead(**dict(sub_row))
-                for sub_row in await self.db.execute(sub_query)
-            ]
-            root_item.subchapters = items
-            self._sort_subchapters(root_item)
-            return root_item
-        return row
+    async def get_by_id(self, chapter_id: UUID) -> ChapterRead:
+        query = (
+            select(Chapter)
+            .where(Chapter.id == chapter_id)  # noqa: E711
+            # load sub chapters too:
+            .options(
+                selectinload(Chapter.subchapters).selectinload(Chapter.subchapters)
+            )
+        )
+        result = await self.db.execute(query)
+        return result.scalar_one_or_none()
 
     async def list(self) -> List[ChapterRead]:
         query = (

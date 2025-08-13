@@ -1,3 +1,4 @@
+from http.client import HTTPException
 from typing import List
 
 from fastapi import APIRouter, Depends
@@ -16,11 +17,11 @@ async def list_chapters(
     return await chapter_service.fetch_all_chapters()
 
 
-# @router.get("/{chapter_id}", response_model=ChapterRead)
-# async def get_chapter(
-#     chapter_id: UUID, repo: ChapterService = Depends(get_chapter_service)
-# ):
-#     chapter = await repo.get_by_id(chapter_id)
-#     if not chapter:
-#         raise HTTPException(status_code=404, detail="Chapter not found")
-#     return chapter
+@router.get("/{chapter_id}", response_model=ChapterRead)
+async def get_chapter(
+    chapter_id: str, chapter_service: ChapterService = Depends(get_chapter_service)
+):
+    chapter = await chapter_service.get_by_id(chapter_id)
+    if not chapter:
+        raise HTTPException(status_code=404, detail="Chapter not found")
+    return chapter
