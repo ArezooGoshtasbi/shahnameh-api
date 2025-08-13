@@ -1,0 +1,23 @@
+{
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit"
+    },
+    "editor.formatOnSave": true,
+    "editor.fontSize": 18,
+    "debug.console.fontSize": 18,
+    "chat.editor.fontSize": 18,
+    "markdown.preview.fontSize": 18,
+    "tailwindCSS.rootFontSize": 18,
+    "editor.minimap.sectionHeaderFontSize": 12,
+    "window.zoomLevel": 2,
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "explicit",
+            "source.organizeImports": "explicit"
+        },
+        "editor.defaultFormatter": "charliermarsh.ruff"
+    },
+    "chat.mcp.discovery.enabled": true,
+    "chat.agent.enabled": true
+}
