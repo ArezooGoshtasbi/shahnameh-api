@@ -32,7 +32,13 @@ class ChapterRepository(IChapterRepository):
             .where(Chapter.id == chapter_id)  # noqa: E711
             # load sub chapters too:
             .options(
-                selectinload(Chapter.subchapters).selectinload(Chapter.subchapters)
+                selectinload(Chapter.subchapters)
+                .selectinload(Chapter.subchapters)
+                .selectinload(Chapter.chapter_metadata),
+                selectinload(Chapter.subchapters).selectinload(
+                    Chapter.chapter_metadata
+                ),
+                selectinload(Chapter.chapter_metadata),
             )
         )
         result = await self.db.execute(query)
@@ -45,7 +51,13 @@ class ChapterRepository(IChapterRepository):
             .where(Chapter.parent_id == None)  # noqa: E711
             # load sub chapters too:
             .options(
-                selectinload(Chapter.subchapters).selectinload(Chapter.subchapters)
+                selectinload(Chapter.subchapters)
+                .selectinload(Chapter.subchapters)
+                .selectinload(Chapter.chapter_metadata),
+                selectinload(Chapter.subchapters).selectinload(
+                    Chapter.chapter_metadata
+                ),
+                selectinload(Chapter.chapter_metadata),
             )
             .order_by(Chapter.order_in_parent)
         )
@@ -54,7 +66,13 @@ class ChapterRepository(IChapterRepository):
                 select(Chapter)
                 .where(Chapter.title.ilike(f"%{title}%"))  # noqa: E711
                 .options(
-                    selectinload(Chapter.subchapters).selectinload(Chapter.subchapters)
+                    selectinload(Chapter.subchapters)
+                    .selectinload(Chapter.subchapters)
+                    .selectinload(Chapter.chapter_metadata),
+                    selectinload(Chapter.subchapters).selectinload(
+                        Chapter.chapter_metadata
+                    ),
+                    selectinload(Chapter.chapter_metadata),
                 )
                 .order_by(Chapter.order_in_parent)
             )
