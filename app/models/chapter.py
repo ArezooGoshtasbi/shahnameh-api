@@ -1,25 +1,9 @@
-import os
+from sqlalchemy import Column, Integer, Text
+from sqlalchemy.orm import relationship
 
-from sqlalchemy import Column, ForeignKey, Integer, Text
-from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from sqlalchemy.orm import declarative_base, relationship
-
-Base = declarative_base()
-
-
-# since sqlite uses text for UUIDs,
-# we need to check the type of the db and provide the correct column type
-def uuid_column(*, primary_key=False, foreign_key=None, nullable=True):
-    db_url = os.getenv("DATABASE_URL", "")
-    if db_url.startswith("postgresql"):
-        coltype = PG_UUID(as_uuid=True)
-    else:
-        coltype = Text
-    args = [coltype]
-    kwargs = {"primary_key": primary_key, "nullable": nullable}
-    if foreign_key:
-        args.append(ForeignKey(foreign_key))
-    return Column(*args, **kwargs)
+from app.models.base import Base
+from app.models.chapter_metadata import ChapterMetadata  # noqa
+from app.utils.model_uuid import uuid_column
 
 
 class Chapter(Base):
@@ -32,4 +16,7 @@ class Chapter(Base):
     parent = relationship("Chapter", remote_side=[id], back_populates="subchapters")
     subchapters = relationship(
         "Chapter", back_populates="parent", cascade="all, delete-orphan"
+    )
+    chapter_metadata = relationship(
+        "ChapterMetadata", uselist=False, back_populates="chapter"
     )
