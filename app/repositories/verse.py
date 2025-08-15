@@ -15,6 +15,9 @@ class IVerseRepository:
     async def list_by_substrings(self, substrings: List[str]) -> List[VerseRead]:
         raise NotImplementedError
 
+    async def list_by_chapter_id(self, chapter_id: UUID) -> List[VerseRead]:
+        raise NotImplementedError
+
 
 class VerseRepository(IVerseRepository):
     def __init__(self, db: AsyncSession):
@@ -26,6 +29,13 @@ class VerseRepository(IVerseRepository):
         )
         result = await self.db.execute(query)
         return result.scalar_one_or_none()
+
+    async def list_by_chapter_id(self, chapter_id: UUID) -> List[VerseRead]:
+        query = (
+            select(Verse).where(Verse.chapter_id == chapter_id)  # noqa: E711
+        )
+        result = await self.db.execute(query)
+        return result.scalars().all()
 
     async def list_by_substrings(self, substrings: List[str]) -> List[VerseRead]:
         conditions = [
