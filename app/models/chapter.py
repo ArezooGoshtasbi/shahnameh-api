@@ -20,3 +20,6 @@ class Chapter(Base):
     chapter_metadata = relationship(
         "ChapterMetadata", uselist=False, back_populates="chapter"
     )
+    verses = relationship(
+        "Verse", back_populates="chapter", cascade="all, delete-orphan"
+    )
