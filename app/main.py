@@ -2,10 +2,13 @@ from fastapi import FastAPI
 
 from app.api.v1.chapter import router as chapter_router
 from app.api.v1.verse import router as verse_router
+from app.dependencies import Container
 
 # from app.core.database import get_db
 
 app = FastAPI()
+
+container = Container()
 
 
 # @app.on_event("startup")
