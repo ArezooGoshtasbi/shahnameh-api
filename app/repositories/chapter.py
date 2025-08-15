@@ -13,7 +13,7 @@ class IChapterRepository:
     async def get_by_id(self, chapter_id: UUID) -> Optional[ChapterRead]:
         raise NotImplementedError
 
-    async def list(self) -> List[ChapterRead]:
+    async def list(self, title: str = None) -> List[ChapterRead]:
         raise NotImplementedError
 
 
@@ -26,31 +26,55 @@ class ChapterRepository(IChapterRepository):
         for sub in chapter.subchapters:
             self._sort_subchapters(sub)
 
-    async def get_by_id(self, chapter_id: UUID) -> Optional[ChapterRead]:
-        query = select(Chapter).where(Chapter.id == chapter_id)
-        row = await self.db.execute(query)
-        if row:
-            root_item = ChapterRead(**dict(row))
-            sub_query = select(Chapter).where(Chapter.parent_id == chapter_id)
-            items = [
-                ChapterRead(**dict(sub_row))
-                for sub_row in await self.db.execute(sub_query)
-            ]
-            root_item.subchapters = items
-            self._sort_subchapters(root_item)
-            return root_item
-        return row
+    async def get_by_id(self, chapter_id: UUID) -> ChapterRead:
+        query = (
+            select(Chapter)
+            .where(Chapter.id == chapter_id)  # noqa: E711
+            # load sub chapters too:
+            .options(
+                selectinload(Chapter.subchapters)
+                .selectinload(Chapter.subchapters)
+                .selectinload(Chapter.chapter_metadata),
+                selectinload(Chapter.subchapters).selectinload(
+                    Chapter.chapter_metadata
+                ),
+                selectinload(Chapter.chapter_metadata),
+            )
+        )
+        result = await self.db.execute(query)
+        return result.scalar_one_or_none()
 
-    async def list(self) -> List[ChapterRead]:
+    async def list(self, title: str = None) -> List[ChapterRead]:
         query = (
             select(Chapter)
             # "is" not gonna work here
             .where(Chapter.parent_id == None)  # noqa: E711
             # load sub chapters too:
             .options(
-                selectinload(Chapter.subchapters).selectinload(Chapter.subchapters)
+                selectinload(Chapter.subchapters)
+                .selectinload(Chapter.subchapters)
+                .selectinload(Chapter.chapter_metadata),
+                selectinload(Chapter.subchapters).selectinload(
+                    Chapter.chapter_metadata
+                ),
+                selectinload(Chapter.chapter_metadata),
             )
             .order_by(Chapter.order_in_parent)
         )
+        if title:
+            query = (
+                select(Chapter)
+                .where(Chapter.title.ilike(f"%{title}%"))  # noqa: E711
+                .options(
+                    selectinload(Chapter.subchapters)
+                    .selectinload(Chapter.subchapters)
+                    .selectinload(Chapter.chapter_metadata),
+                    selectinload(Chapter.subchapters).selectinload(
+                        Chapter.chapter_metadata
+                    ),
+                    selectinload(Chapter.chapter_metadata),
+                )
+                .order_by(Chapter.order_in_parent)
+            )
         result = await self.db.execute(query)
         return result.scalars().all()
