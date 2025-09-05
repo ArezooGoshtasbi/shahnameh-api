@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
+from typing import List
 
 from sentence_transformers import SentenceTransformer
 
 from app.repositories.explanation import IExplanationRepository
-from app.schemas.explanation import ExplanationCreate
+from app.schemas.explanation import ExplanationCreate, ExplanationRead
 
 
 class IExplanationService(ABC):
@@ -39,7 +40,7 @@ class ExplanationService(IExplanationService):
             embedding=vec.tolist(),
         )
 
-    async def search(self, query: str):
+    async def search(self, query: str) -> List[ExplanationRead]:
         query_vec = self.model.encode([query], normalize_embeddings=True)[
             0
         ].tolist()

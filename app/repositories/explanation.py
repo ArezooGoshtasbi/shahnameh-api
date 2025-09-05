@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.explanation import Explanation  # Import your ORM model
@@ -25,6 +26,9 @@ class ExplanationRepository(IExplanationRepository):
     def __init__(self, db: AsyncSession):
         self.db = db
 
+    def to_pgvector(v):
+        return "[" + ",".join(f"{x:.6f}" for x in v) + "]"
+
     async def create_explanation(
         self, explanation: ExplanationCreate, embedding: List[float]
     ) -> ExplanationRead:
@@ -37,11 +41,18 @@ class ExplanationRepository(IExplanationRepository):
         return new_explanation
 
     async def search(
-        self, query_vec: List[float], limit: float = 0.5
+        self, query_vec: List[float], limit: float = 1
     ) -> List[ExplanationRead]:
+        vector_str = "[" + ",".join(str(float(x)) for x in query_vec) + "]"
         result = await self.db.execute(
-            "SELECT * FROM explanations WHERE embedding <-> :query_vec < :limit",
-            {"query_vec": query_vec, "limit": limit},
+            text(
+                """
+SELECT *, embedding <-> CAST(:query_vec AS vector) AS distance
+FROM explanations
+ORDER BY distance
+LIMIT :limit
+        """
+            ),
+            {"query_vec": vector_str, "limit": limit},
         )
-        explanations = result.scalars().all()
-        return explanations
+        return result.fetchall()
