@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from app.api.v1.chapter import router as chapter_router
+from app.api.v1.explanation import router as explanation_router
 from app.api.v1.verse import router as verse_router
 from app.dependencies import Container
 
@@ -23,3 +24,4 @@ container = Container()
 
 app.include_router(chapter_router, prefix="/api/v1")
 app.include_router(verse_router, prefix="/api/v1")
+app.include_router(explanation_router, prefix="/api/v1")

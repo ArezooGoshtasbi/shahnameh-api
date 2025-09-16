@@ -11,8 +11,13 @@ dependencies = [
     "dependency-injector>=4.48.1",
     "fastapi[standard]>=0.116.1",
     "greenlet>=3.2.3",
+    "pgvector>=0.4.1",
     "psycopg2-binary>=2.9.10",
     "python-dotenv>=1.1.1",
+    "sentence-transformers>=5.1.0",
     "sqlalchemy>=2.0.41",
     "uvicorn>=0.35.0",
 ]
+
+[tool.ruff]
+line-length = 79
